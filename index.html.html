@@ -1,0 +1,1655 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>강호일기: 무명에서 천하제일인까지</title>
+  <style>
+    :root {
+      --bg-primary: #12100e;
+      --bg-card: #1e1b18;
+      --bg-header: #0a0908;
+      --border-color: #854d0e;
+      --accent-color: #f59e0b;
+      --text-main: #f5f5f4;
+      --text-sub: #a8a29e;
+      --gold-glow: rgba(245, 158, 11, 0.3);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Malgun Gothic', 'Noto Serif KR', sans-serif; }
+    body { background-color: var(--bg-primary); color: var(--text-main); display: flex; justify-content: center; min-height: 100vh; padding: 12px; }
+
+    .game-wrapper { width: 100%; max-width: 440px; background-color: var(--bg-card); border: 2px solid var(--border-color); border-radius: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.9); display: flex; flex-direction: column; overflow: hidden; position: relative; }
+    
+    .header-bar { background-color: var(--bg-header); padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border-color); }
+    .header-title { color: var(--accent-color); font-size: 1.1rem; font-weight: bold; }
+    .header-age { background: rgba(0,0,0,0.5); padding: 3px 10px; border-radius: 15px; font-size: 0.85rem; border: 1px solid var(--border-color); }
+
+    .nav-tabs { display: flex; background: rgba(0,0,0,0.5); border-bottom: 1px solid var(--border-color); }
+    .tab-btn { flex: 1; padding: 10px; background: none; border: none; color: var(--text-sub); font-size: 0.85rem; cursor: pointer; transition: 0.2s; }
+    .tab-btn.active { color: var(--accent-color); border-bottom: 2px solid var(--accent-color); font-weight: bold; background: rgba(255,255,255,0.05); }
+
+    .content-area { padding: 12px; flex: 1; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; }
+
+    .character-card { background: rgba(0,0,0,0.4); border: 1.5px solid var(--border-color); border-radius: 8px; padding: 10px; text-align: center; }
+    .canvas-frame { width: 160px; height: 160px; margin: 0 auto; border-radius: 50%; border: 2px solid var(--accent-color); overflow: hidden; background: #181412; box-shadow: 0 0 12px var(--gold-glow); display: flex; justify-content: center; align-items: center; }
+    canvas { width: 100%; height: 100%; image-rendering: pixelated; }
+
+    .char-title-tag { display: inline-block; background: #78350f; color: #fef08a; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: bold; margin-top: 4px; }
+    .char-name { font-size: 1.2rem; font-weight: bold; margin-top: 2px; }
+    .char-badge { display: inline-block; background: var(--border-color); color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; margin-top: 2px; margin-right: 3px; }
+    .char-rank { display: inline-block; background: #065f46; color: #a7f3d0; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; margin-top: 2px; }
+
+    .power-box { background: rgba(245, 158, 11, 0.15); border: 1px solid var(--accent-color); padding: 6px; border-radius: 5px; text-align: center; font-size: 0.95rem; font-weight: bold; color: var(--accent-color); margin-top: 6px; }
+
+    .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+    .stat-item { background: rgba(0,0,0,0.3); padding: 7px 10px; border-radius: 5px; border-left: 3px solid var(--accent-color); display: flex; justify-content: space-between; font-size: 0.8rem; }
+
+    .skill-info-box { background: rgba(0,0,0,0.35); padding: 8px 12px; border-radius: 6px; border-left: 3px solid var(--accent-color); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 4px; }
+    .skill-title-text { font-size: 0.82rem; color: #e7e5e4; font-weight: bold; word-break: keep-all; }
+    .skill-level-text { font-size: 0.82rem; color: #4ade80; font-weight: bold; white-space: nowrap; }
+
+    .log-container { background: rgba(0,0,0,0.4); border: 1px solid var(--border-color); border-radius: 5px; padding: 8px; height: 80px; overflow-y: auto; font-size: 0.8rem; line-height: 1.4; color: #d6d3d1; }
+
+    .btn-group { display: flex; flex-direction: column; gap: 6px; }
+    .action-btn { background: linear-gradient(180deg, var(--bg-card) 0%, var(--bg-header) 100%); border: 1px solid var(--border-color); color: var(--text-main); padding: 10px 12px; border-radius: 5px; cursor: pointer; font-size: 0.85rem; text-align: left; transition: 0.2s; display: flex; justify-content: space-between; align-items: center; }
+    .action-btn:hover { border-color: var(--accent-color); background: var(--border-color); }
+    .retire-btn { background: #450a0a; border-color: #991b1b; color: #fca5a5; text-align: center; justify-content: center; font-weight: bold; padding: 9px; margin-top: 4px; }
+
+    .modal-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.92); display: flex; justify-content: center; align-items: center; padding: 15px; z-index: 100; }
+    .modal-content { background: var(--bg-card); border: 2px solid var(--accent-color); border-radius: 8px; padding: 15px; width: 100%; max-height: 92%; overflow-y: auto; }
+    
+    .form-group { margin-bottom: 12px; }
+    .form-group label { display: block; margin-bottom: 4px; color: var(--accent-color); font-weight: bold; font-size: 0.85rem; }
+    .form-control { width: 100%; padding: 8px; background: #111; border: 1px solid var(--border-color); color: #fff; border-radius: 4px; font-size: 0.85rem; }
+
+    .preview-box { text-align: center; margin-bottom: 10px; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px; border: 1px dashed var(--accent-color); }
+    .preview-canvas-frame { width: 140px; height: 140px; margin: 0 auto; border-radius: 50%; border: 2px solid var(--accent-color); overflow: hidden; background: #181412; display: flex; justify-content: center; align-items: center; }
+
+    .appearance-selector { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; max-height: 180px; overflow-y: auto; }
+    .app-card { background: #111; border: 1px solid var(--border-color); padding: 8px; border-radius: 5px; text-align: center; cursor: pointer; font-size: 0.75rem; transition: 0.2s; }
+    .app-card.selected { border-color: var(--accent-color); background: rgba(245,158,11,0.25); font-weight: bold; }
+
+    .stat-alloc-box { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+    .stat-alloc-row { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.4); padding: 6px 10px; border-radius: 5px; border: 1px solid var(--border-color); font-size: 0.85rem; }
+    .stat-btn { background: var(--border-color); border: none; color: #fff; width: 26px; height: 26px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.9rem; }
+
+    .tournament-card { background: rgba(0,0,0,0.4); border: 1px solid var(--accent-color); padding: 10px; border-radius: 5px; margin-bottom: 10px; text-align: center; }
+
+    .diff-plus { color: #4ade80; font-weight: bold; }
+    .diff-minus { color: #f87171; font-weight: bold; }
+
+    .loading-box { width: 100%; background: #14110f; border: 2px solid var(--accent-color); border-radius: 8px; padding: 20px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 12px; box-shadow: 0 0 25px rgba(0,0,0,0.9); }
+    .loading-text { font-size: 1rem; font-weight: bold; color: var(--accent-color); min-height: 30px; display: flex; align-items: center; justify-content: center; }
+    .loading-bar-container { width: 100%; height: 12px; background: #26221f; border-radius: 6px; border: 1px solid var(--border-color); overflow: hidden; position: relative; }
+    .loading-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #b45309 0%, #f59e0b 100%); transition: width 0.1s linear; }
+    .skip-btn { background: rgba(255,255,255,0.08); border: 1px solid var(--border-color); color: var(--text-sub); padding: 6px 14px; border-radius: 15px; font-size: 0.75rem; cursor: pointer; margin-top: 4px; transition: 0.2s; }
+    .skip-btn:hover { color: #fff; border-color: var(--accent-color); }
+
+    .summary-power-highlight { background: rgba(245, 158, 11, 0.2); border: 2px solid var(--accent-color); border-radius: 6px; padding: 10px; text-align: center; font-size: 1rem; font-weight: bold; color: var(--accent-color); box-shadow: 0 0 10px var(--gold-glow); grid-column: span 2; margin-top: 4px; }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+<div class="game-wrapper">
+  <div class="header-bar">
+    <div class="header-title">🌸 강호일기</div>
+    <div class="header-age"><span id="ui-age">12</span>세 (<span id="ui-faction">거지</span>)</div>
+  </div>
+
+  <div class="nav-tabs">
+    <button class="tab-btn active" onclick="switchTab('main')">무사 카드</button>
+    <button class="tab-btn" onclick="switchTab('stats')">무공 스탯</button>
+    <button class="tab-btn" onclick="switchTab('log')">강호 기록</button>
+  </div>
+
+  <div id="tab-main" class="content-area">
+    <div class="character-card">
+      <div class="canvas-frame">
+        <canvas id="pixelCanvas" width="720" height="720"></canvas>
+      </div>
+      <div class="char-title-tag" id="ui-title">무명소협(無名小俠)</div>
+      <div class="char-name" id="ui-name">소협</div>
+      <div>
+        <span class="char-badge" id="ui-realm">삼류(三流)</span>
+        <span class="char-rank" id="ui-rank">평거지</span>
+      </div>
+      <div class="power-box">⚔️ 총 전투력: <span id="ui-total-power">0</span> / 1000</div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-item"><span>💪 근력</span><b id="ui-str">0</b></div>
+      <div class="stat-item"><span>☯️ 내력</span><b id="ui-int">0</b></div>
+      <div class="stat-item"><span>⚡ 보법</span><b id="ui-agi">0</b></div>
+      <div class="stat-item"><span>🧠 학문</span><b id="ui-edu">0</b></div>
+      <div class="stat-item"><span>✨ 기연</span><b id="ui-kar">0</b></div>
+      <div class="stat-item"><span>📜 명성</span><b id="ui-rep">0</b></div>
+    </div>
+
+    <div class="skill-info-box">
+      <div class="skill-title-text">📜 무학: <span id="ui-skill-name" style="color:var(--accent-color);">기초 타구봉법</span></div>
+      <div class="skill-level-text" id="ui-skill-level">Lv.1 / 10</div>
+    </div>
+
+    <div class="log-container" id="recent-log">
+      <div class="log-item">소협, 거지 신분으로 강호에 첫발을 내딛습니다.</div>
+    </div>
+
+    <div id="action-container">
+      <div class="btn-group" id="action-buttons"></div>
+      <button class="action-btn retire-btn" onclick="confirmRetire()">🍂 강호 은퇴하기</button>
+    </div>
+  </div>
+
+  <div id="tab-stats" class="content-area hidden">
+    <h3 style="color:var(--accent-color); margin-bottom:8px; font-size:0.95rem;">상세 능력치 & 전투력</h3>
+    <div class="stats-grid" style="grid-template-columns: 1fr;">
+      <div class="stat-item"><span>총 전투력 (최대 1000)</span><b id="ui-detail-power">0 / 1000</b></div>
+      <div class="stat-item"><span>근력 (물리 공격력)</span><b id="ui-detail-str">0 / 99</b></div>
+      <div class="stat-item"><span>내력 (공력 및 심법)</span><b id="ui-detail-int">0 / 99</b></div>
+      <div class="stat-item"><span>보법 (속도 및 회피)</span><b id="ui-detail-agi">0 / 99</b></div>
+      <div class="stat-item"><span>학문 (지적 식견)</span><b id="ui-detail-edu">0 / 99</b></div>
+      <div class="stat-item"><span>명성 (강호 입지)</span><b id="ui-detail-rep">0 / 99</b></div>
+      <div class="stat-item"><span>기연 (운 및 행운)</span><b id="ui-detail-kar">0 / 99</b></div>
+    </div>
+  </div>
+
+  <div id="tab-log" class="content-area hidden">
+    <h3 style="color:var(--accent-color); margin-bottom:8px; font-size:0.95rem;">전체 강호 기록</h3>
+    <div class="log-container" id="full-log" style="height: 320px;"></div>
+  </div>
+
+  <!-- 수련 연출 로딩 모달 -->
+  <div id="loading-modal" class="modal-overlay hidden">
+    <div class="loading-box">
+      <div style="font-size:1.5rem;">☯️</div>
+      <div class="loading-text" id="loading-status-text">운기조식 진행 중...</div>
+      <div class="loading-bar-container">
+        <div class="loading-bar-fill" id="loading-bar"></div>
+      </div>
+      <button class="skip-btn" onclick="skipLoading()">건너뛰기 ⚡</button>
+    </div>
+  </div>
+
+  <!-- 무림맹주 선택 모달 -->
+  <div id="alliance-leader-modal" class="modal-overlay hidden">
+    <div class="modal-content" style="text-align:center;">
+      <h2 style="color:var(--accent-color); margin-bottom:8px; font-size:1.1rem;">🏆 천하제일인의 선택</h2>
+      <p style="font-size:0.85rem; line-height:1.4; margin-bottom:12px;">
+        천하제일 무공대회 우승자로서 무림맹주로 추대되었습니다!
+      </p>
+      <div style="display:flex; flex-direction:column; gap:6px;">
+        <button class="action-btn" style="background:#065f46; justify-content:center; font-weight:bold;" onclick="chooseAllianceLeader('leader')">무림맹주 자리를 수락한다 👑</button>
+        <button class="action-btn" style="justify-content:center; font-weight:bold;" onclick="chooseAllianceLeader('stay')">기존 문파 소속으로 살아간다 🍃</button>
+        <button class="action-btn" style="background:#450a0a; justify-content:center; font-weight:bold;" onclick="chooseAllianceLeader('retire')">강호를 은퇴하고 전설이 된다 📜</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 환골탈태 선택 모달 -->
+  <div id="rebirth-modal" class="modal-overlay hidden">
+    <div class="modal-content" style="text-align:center;">
+      <h2 style="color:var(--accent-color); margin-bottom:8px; font-size:1.1rem;">✨ 환골탈태(換骨奪胎) 발동!</h2>
+      <p style="font-size:0.85rem; line-height:1.4; margin-bottom:12px;">
+        70세의 나이에 모든 능력치가 80 이상에 도달하여 전설 속 환골탈태를 경험합니다!<br>
+        <b>극의에 다다를 2개의 능력치를 고르십시오. (해당 스탯 99 고정)</b>
+      </p>
+      <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:12px;" id="rebirth-choices"></div>
+    </div>
+  </div>
+
+  <!-- 캐릭터 생성 모달 -->
+  <div id="create-modal" class="modal-overlay">
+    <div class="modal-content">
+      <h2 style="color:var(--accent-color); margin-bottom: 12px; text-align:center; font-size:1.1rem;">✨ 무사 생성 (720*720 도트)</h2>
+      
+      <div id="create-step-1">
+        <div class="form-group">
+          <label>소협의 이름 (10자 이내)</label>
+          <input type="text" id="input-name" class="form-control" maxlength="10" placeholder="이름을 입력하세요">
+        </div>
+        <div class="form-group">
+          <label>성별 선택</label>
+          <select id="input-gender" class="form-control" onchange="renderAppearanceOptions()">
+            <option value="male">남성</option>
+            <option value="female">여성</option>
+          </select>
+        </div>
+        <button class="action-btn" style="text-align:center; justify-content:center; font-weight:bold;" onclick="goToStep2()">외형 직접 선택하기 👉</button>
+      </div>
+
+      <div id="create-step-2" class="hidden">
+        <div class="preview-box">
+          <div class="preview-canvas-frame">
+            <canvas id="previewCanvas" width="720" height="720"></canvas>
+          </div>
+        </div>
+
+        <label style="color:var(--accent-color); font-weight:bold; display:block; margin-bottom:6px; font-size:0.85rem;">외형 선택 (고화질 픽셀 720p)</label>
+        <div class="appearance-selector" id="appearance-list"></div>
+
+        <div style="display:flex; gap:6px; margin-top:12px;">
+          <button class="action-btn" style="flex:1; text-align:center; justify-content:center;" onclick="goToStep1()">◀ 이전</button>
+          <button class="action-btn" style="flex:2; text-align:center; justify-content:center; font-weight:bold;" onclick="goToStep3()">능력치 직접 분배하기 👉</button>
+        </div>
+      </div>
+
+      <div id="create-step-3" class="hidden">
+        <div style="text-align:center; margin-bottom:10px;">
+          <span style="font-size:0.85rem; color:var(--text-sub);">남은 보유 포인트: </span>
+          <b id="alloc-remaining-points" style="color:var(--accent-color); font-size:1.1rem;">45</b>
+        </div>
+
+        <div class="stat-alloc-box">
+          <div class="stat-alloc-row"><span>💪 근력</span><div><button class="stat-btn" onclick="changeAllocStat('str', -1)">-</button><b id="alloc-val-str" style="display:inline-block; width:28px; text-align:center;">1</b><button class="stat-btn" onclick="changeAllocStat('str', 1)">+</button></div></div>
+          <div class="stat-alloc-row"><span>☯️ 내력</span><div><button class="stat-btn" onclick="changeAllocStat('int', -1)">-</button><b id="alloc-val-int" style="display:inline-block; width:28px; text-align:center;">1</b><button class="stat-btn" onclick="changeAllocStat('int', 1)">+</button></div></div>
+          <div class="stat-alloc-row"><span>⚡ 보법</span><div><button class="stat-btn" onclick="changeAllocStat('agi', -1)">-</button><b id="alloc-val-agi" style="display:inline-block; width:28px; text-align:center;">1</b><button class="stat-btn" onclick="changeAllocStat('agi', 1)">+</button></div></div>
+          <div class="stat-alloc-row"><span>🧠 학문</span><div><button class="stat-btn" onclick="changeAllocStat('edu', -1)">-</button><b id="alloc-val-edu" style="display:inline-block; width:28px; text-align:center;">1</b><button class="stat-btn" onclick="changeAllocStat('edu', 1)">+</button></div></div>
+          <div class="stat-alloc-row"><span>✨ 기연</span><div><button class="stat-btn" onclick="changeAllocStat('kar', -1)">-</button><b id="alloc-val-kar" style="display:inline-block; width:28px; text-align:center;">1</b><button class="stat-btn" onclick="changeAllocStat('kar', 1)">+</button></div></div>
+        </div>
+
+        <div style="display:flex; gap:6px;">
+          <button class="action-btn" style="flex:1; text-align:center; justify-content:center;" onclick="goToStep2()">◀ 이전</button>
+          <button class="action-btn" style="flex:2; text-align:center; justify-content:center; font-weight:bold; background:var(--border-color);" onclick="finishCharacterCreation()">강호 입문 ⚔️</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 돌발 무공 습득 모달 -->
+  <div id="skill-event-modal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <h2 style="color:var(--accent-color); text-align:center; margin-bottom:8px; font-size:1.05rem;">📜 돌발 무학 깨달음!</h2>
+      <p style="font-size:0.85rem; line-height:1.4; margin-bottom:12px; text-align:center;" id="skill-event-desc">
+        수련 도중 상위 비기를 습득할 기회가 찾아왔습니다!
+      </p>
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <button class="action-btn" style="background:#065f46; justify-content:center; font-weight:bold;" onclick="acceptNewSkill()">전수받기 ⚔️</button>
+        <button class="action-btn" style="background:#450a0a; justify-content:center; font-weight:bold;" onclick="declineNewSkill()">거절하기 🛡️</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 주화입마 모달 -->
+  <div id="deviance-modal" class="modal-overlay hidden">
+    <div class="modal-content" style="border-color:#ef4444; text-align:center;">
+      <h2 style="color:#ef4444; margin-bottom:8px; font-size:1.05rem;">⚠️ 주화입마(走火入魔) 발생!</h2>
+      <p style="font-size:0.85rem; line-height:1.4; color:#fca5a5; margin-bottom:12px;">
+        성급한 수련으로 내기가 미세하게 역류했습니다!<br>
+        <b>스탯이 3씩 감소하며 무공 습득에 실패했습니다.</b>
+      </p>
+      <button class="action-btn" style="background:#7f1d1d; justify-content:center; font-weight:bold;" onclick="closeDevianceModal()">내상 수습하기 🩸</button>
+    </div>
+  </div>
+
+  <!-- 돌발 선택 모달 -->
+  <div id="random-event-modal" class="modal-overlay hidden">
+    <div class="modal-content" style="text-align:center;">
+      <h2 style="color:var(--accent-color); margin-bottom:8px; font-size:1.05rem;" id="rand-event-title">⚡ 돌발 강호 사건</h2>
+      <p style="font-size:0.85rem; line-height:1.4; margin-bottom:12px;" id="rand-event-desc"></p>
+      <div style="display:flex; gap:8px;" id="rand-event-btns">
+        <button class="action-btn" style="flex:1; justify-content:center; background:#065f46; font-weight:bold;" onclick="resolveRandomEvent(true)">도전하기 ⚔️</button>
+        <button class="action-btn" style="flex:1; justify-content:center; background:#450a0a; font-weight:bold;" onclick="resolveRandomEvent(false)">사양하기 🏃</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 돌발 사건 결과 모달 -->
+  <div id="event-result-modal" class="modal-overlay hidden">
+    <div class="modal-content" style="text-align:center;">
+      <h2 style="color:var(--accent-color); margin-bottom:8px; font-size:1.05rem;" id="event-result-title">📢 사건 결과</h2>
+      <p style="font-size:0.85rem; line-height:1.4; margin-bottom:12px;" id="event-result-desc"></p>
+      <button class="action-btn" style="justify-content:center; font-weight:bold; width:100%;" onclick="closeEventResultModal()">수련 계속 진행하기 ⚔️</button>
+    </div>
+  </div>
+
+  <!-- 20세 문파 선택 모달 -->
+  <div id="faction-select-modal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <h2 style="color:var(--accent-color); text-align:center; margin-bottom:8px; font-size:1.05rem;">⛩️ 20세 강호 입문 선택</h2>
+      <p style="font-size:0.8rem; line-height:1.35; margin-bottom:12px; text-align:center;" id="faction-select-desc">
+        20세 성년이 되어 정식으로 소속될 문파/세가를 선택합니다.
+      </p>
+      <div class="btn-group" id="faction-choices"></div>
+    </div>
+  </div>
+
+  <!-- 대회 참가 선택 모달 -->
+  <div id="tournament-ask-modal" class="modal-overlay hidden">
+    <div class="modal-content" style="text-align:center;">
+      <h2 style="color:var(--accent-color); margin-bottom:8px; font-size:1.05rem;" id="tour-ask-title">🏆 대회 개최</h2>
+      <p style="font-size:0.85rem; line-height:1.4; margin-bottom:12px;" id="tour-ask-desc">
+        대회가 개최되었습니다. 참가하시겠습니까?
+      </p>
+      <div style="display:flex; gap:8px;">
+        <button class="action-btn" style="flex:1; text-align:center; justify-content:center; background:#065f46;" onclick="startTournament()">참가하기 ⚔️</button>
+        <button class="action-btn" style="flex:1; text-align:center; justify-content:center; background:#450a0a;" onclick="skipTournament()">지켜보기 🏃</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 비무 대회 모달 -->
+  <div id="tournament-modal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <h2 style="color:var(--accent-color); text-align:center; margin-bottom:8px; font-size:1.05rem;" id="tour-modal-title">🏆 비무대회</h2>
+
+      <div class="tournament-card" id="tournament-match-box">
+        <h3 id="tournament-round-title" style="color:var(--accent-color);">16강 비무</h3>
+        <p id="tournament-enemy-info" style="margin-top:4px; font-size:0.85rem;">상대 대전자</p>
+        <div style="margin-top:6px; font-size:0.85rem; font-weight:bold; color:#4ade80;">
+          내 전투력: <span id="tour-my-power">0</span> vs 상대 전투력: <span id="tour-enemy-power">0</span>
+        </div>
+      </div>
+
+      <div id="tournament-result-log" style="background:rgba(0,0,0,0.4); padding:8px; border-radius:5px; font-size:0.8rem; margin-bottom:12px; min-height:50px;">
+        비무 준비 완료!
+      </div>
+
+      <div style="display:flex; gap:6px;">
+        <button class="action-btn" id="tournament-btn" style="flex:2; text-align:center; justify-content:center; font-weight:bold;" onclick="handleTournamentClick()">비무 시작 ⚔️</button>
+        <button class="action-btn" id="tournament-forfeit-btn" style="flex:1; text-align:center; justify-content:center; background:#450a0a; font-weight:bold;" onclick="forfeitTournament()">기권하기 🏳️</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 연도 결산 모달 -->
+  <div id="year-transition-modal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <div id="summary-step-1">
+        <h3 style="color:var(--accent-color); text-align:center; margin-bottom:10px; font-size:1.05rem;" id="summary-title">[12세] 강호 결산</h3>
+        <div style="background:rgba(0,0,0,0.3); padding:10px; border-radius:5px; margin-bottom:12px; font-size:0.85rem; line-height:1.4;" id="summary-event-text"></div>
+        <button class="action-btn" style="text-align:center; justify-content:center; font-weight:bold;" onclick="showSummaryStep2()">성장 확인 👉</button>
+      </div>
+
+      <div id="summary-step-2" class="hidden">
+        <h3 style="color:var(--accent-color); text-align:center; margin-bottom:10px; font-size:1.05rem;">📈 능력치 성장 보고서 (2년 수련)</h3>
+        <div class="stats-grid" style="grid-template-columns: 1fr; margin-bottom:12px;" id="summary-stats-diff"></div>
+        <button class="action-btn" style="text-align:center; justify-content:center; font-weight:bold; background:var(--border-color);" onclick="closeYearSummary()">다음 2년으로 ⚔️</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 은퇴 모달 -->
+  <div id="retire-modal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <div id="retire-page-1">
+        <h2 style="color:var(--accent-color); text-align:center; margin-bottom:8px; font-size:1.1rem;">📜 강호 일대기: 제1장 [강호 여정]</h2>
+        <div style="text-align:center; margin-bottom:12px;">
+          <div class="canvas-frame" style="width:110px; height:110px;">
+            <canvas id="retireCanvas" width="720" height="720"></canvas>
+          </div>
+          <h3 style="margin-top:6px; font-size:1.05rem;" id="retire-char-name">소협</h3>
+          <p style="color:var(--accent-color); font-size:0.85rem;" id="retire-char-title">무명소협 / 삼류 고수</p>
+        </div>
+
+        <div style="background:rgba(245,158,11,0.15); border:1px solid var(--accent-color); border-radius:8px; padding:12px; text-align:center; margin-bottom:12px;">
+          <div style="font-size:1.1rem; font-weight:bold; color:var(--accent-color);" id="retire-period-text">12세 ~ 50세 (총 38년간 활동)</div>
+          <div style="font-size:0.85rem; margin-top:4px; color:#d6d3d1;" id="retire-summary-power">최고 전투력: 0 | 최종 경지: 삼류</div>
+        </div>
+
+        <button class="action-btn" style="text-align:center; justify-content:center; font-weight:bold;" onclick="showRetirePage(2)">수상 & 무용담 보기 (제2장) 👉</button>
+      </div>
+
+      <div id="retire-page-2" class="hidden">
+        <h2 style="color:var(--accent-color); text-align:center; margin-bottom:8px; font-size:1.1rem;">📜 강호 일대기: 제2장 [무용담 & 훈장]</h2>
+        
+        <div class="stats-grid" style="grid-template-columns:1fr; margin-bottom:12px;">
+          <div class="stat-item"><span>🏆 비무대회 우승 횟수</span><b id="retire-tour-wins">0회</b></div>
+          <div class="stat-item"><span>👹 사파/마교 무찌른 횟수</span><b id="retire-cult-kills">0회</b></div>
+          <div class="stat-item"><span>📜 최종 강호 명성</span><b id="retire-final-rep">0</b></div>
+        </div>
+
+        <div style="background:rgba(0,0,0,0.4); border:1px solid var(--border-color); padding:8px; border-radius:5px; height:120px; overflow-y:auto; font-size:0.75rem; line-height:1.35; margin-bottom:12px;" id="retire-award-list"></div>
+
+        <div style="display:flex; gap:6px;">
+          <button class="action-btn" style="flex:1; text-align:center; justify-content:center;" onclick="showRetirePage(1)">◀ 이전</button>
+          <button class="action-btn" style="flex:2; text-align:center; justify-content:center; font-weight:bold;" onclick="showRetirePage(3)">보물 & 영약 기록 (제3장) 👉</button>
+        </div>
+      </div>
+
+      <div id="retire-page-3" class="hidden">
+        <h2 style="color:var(--accent-color); text-align:center; margin-bottom:8px; font-size:1.1rem;">📜 강호 일대기: 제3장 [보물 & 영약]</h2>
+        
+        <div style="background:rgba(0,0,0,0.4); border:1px solid var(--border-color); padding:10px; border-radius:6px; min-height:160px; font-size:0.8rem; line-height:1.5; margin-bottom:12px;" id="retire-treasures-list"></div>
+
+        <div style="display:flex; gap:6px;">
+          <button class="action-btn" style="flex:1; text-align:center; justify-content:center;" onclick="showRetirePage(2)">◀ 이전</button>
+          <button class="action-btn" style="flex:2; text-align:center; justify-content:center; font-weight:bold; background:var(--border-color);" onclick="location.reload()">새로운 전설 시작하기 🔄</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const factionOutfitColors = {
+  "거지": { primary: "#6c584c", secondary: "#8d7b68" },
+  "소림사": { primary: "#eab308", secondary: "#ca8a04" },
+  "무당파": { primary: "#0f172a", secondary: "#0284c7" },
+  "화산파": { primary: "#f5f5f4", secondary: "#dc2626" },
+  "사천당문": { primary: "#059669", secondary: "#18181b" },
+  "남궁세가": { primary: "#ffffff", secondary: "#eab308" },
+  "제갈세가": { primary: "#0284c7", secondary: "#f8fafc" },
+  "하북팽가": { primary: "#7f1d1d", secondary: "#18181b" },
+  "무림맹": { primary: "#000000", secondary: "#f59e0b" }
+};
+
+const gameData = {
+  game_config: {
+    faction_ranks: {
+      "거지": [{ name: "평거지", min_rep: 0 }, { name: "조장", min_rep: 25 }, { name: "분타주", min_rep: 55 }, { name: "개방 방주", min_rep: 85 }],
+      "일반": [{ name: "평제자", min_rep: 0 }, { name: "대제자", min_rep: 25 }, { name: "문파 장로", min_rep: 55 }, { name: "장문인", min_rep: 85 }],
+      "세가": [{ name: "평제자", min_rep: 0 }, { name: "소가주", min_rep: 25 }, { name: "가문 장로", min_rep: 55 }, { name: "가주", min_rep: 85 }],
+      "무림맹": [{ name: "무림맹원", min_rep: 0 }, { name: "맹주 자문", min_rep: 50 }, { name: "무림맹주", min_rep: 85 }]
+    },
+    titles: [
+      { name: "무명소협(無名小俠)", req_rep: 0 },
+      { name: "강호신예(江湖新銳)", req_rep: 15 },
+      { name: "강호대협(江湖大俠)", req_rep: 35 },
+      { name: "절세고수(絶世高手)", req_rep: 55 },
+      { name: "무림제일검(武林第一劍)", req_rep: 75 },
+      { name: "검존(劍尊)", req_rep: 88 },
+      { name: "천하제일인(天下第一人)", req_rep: 99 }
+    ],
+    realm_stages: [
+      { name: "삼류(三流)", min_internal_power: 0 },
+      { name: "이류(二流)", min_internal_power: 20 },
+      { name: "일류(一流)", min_internal_power: 40 },
+      { name: "절정(絶頂)", min_internal_power: 60 },
+      { name: "초절정(超絶頂)", min_internal_power: 75 },
+      { name: "화경(化境)", min_internal_power: 88 },
+      { name: "현경(玄境)", min_internal_power: 99 }
+    ]
+  },
+  faction_skills: {
+    "거지": [
+      { level: 1, name: "기초 타구봉법", reqType: "stats", reqInt: 0, reqStr: 0, bonus: 20 },
+      { level: 2, name: "취팔선권", reqType: "stats", reqInt: 5, reqStr: 5, bonus: 50 },
+      { level: 3, name: "유룡타구봉", reqType: "power", reqPower: 150, bonus: 90 },
+      { level: 4, name: "복호타구장", reqType: "power", reqPower: 300, bonus: 130 },
+      { level: 5, name: "최종비기: 항룡십팔장 신룡유회", reqType: "power", reqPower: 500, bonus: 178 }
+    ],
+    "화산파": [
+      { level: 1, name: "화산기본검법", reqType: "stats", reqInt: 0, reqStr: 0, bonus: 20 },
+      { level: 2, name: "육합검법", reqType: "stats", reqInt: 5, reqStr: 5, bonus: 50 },
+      { level: 3, name: "매화삼십육검", reqType: "power", reqPower: 150, bonus: 90 },
+      { level: 4, name: "자하공 내경검", reqType: "power", reqPower: 300, bonus: 130 },
+      { level: 5, name: "최종비기: 칠십이보 매화검진", reqType: "power", reqPower: 500, bonus: 178 }
+    ],
+    "소림사": [
+      { level: 1, name: "소림장권", reqType: "stats", reqInt: 0, reqStr: 0, bonus: 20 },
+      { level: 2, name: "백열금강권", reqType: "stats", reqInt: 5, reqStr: 8, bonus: 50 },
+      { level: 3, name: "용조수", reqType: "power", reqPower: 150, bonus: 90 },
+      { level: 4, name: "역근경 내경통", reqType: "power", reqPower: 300, bonus: 130 },
+      { level: 5, name: "최종비기: 달마신공 대금강신통", reqType: "power", reqPower: 500, bonus: 178 }
+    ],
+    "무당파": [
+      { level: 1, name: "무당장권", reqType: "stats", reqInt: 0, reqStr: 0, bonus: 20 },
+      { level: 2, name: "양의검법", reqType: "stats", reqInt: 8, reqStr: 5, bonus: 50 },
+      { level: 3, name: "태극권", reqType: "power", reqPower: 150, bonus: 90 },
+      { level: 4, name: "태극혜검", reqType: "power", reqPower: 300, bonus: 130 },
+      { level: 5, name: "최종비기: 무당순양무극공 태극검해", reqType: "power", reqPower: 500, bonus: 178 }
+    ],
+    "사천당문": [
+      { level: 1, name: "당문기초암기", reqType: "stats", reqInt: 0, reqStr: 0, bonus: 20 },
+      { level: 2, name: "만천화우", reqType: "stats", reqInt: 5, reqStr: 5, bonus: 50 },
+      { level: 3, name: "독경비전", reqType: "power", reqPower: 150, bonus: 90 },
+      { level: 4, name: "백포독혈장", reqType: "power", reqPower: 300, bonus: 130 },
+      { level: 5, name: "최종비기: 만천화우 오독신공", reqType: "power", reqPower: 500, bonus: 178 }
+    ],
+    "남궁세가": [
+      { level: 1, name: "남궁기본검", reqType: "stats", reqInt: 0, reqStr: 0, bonus: 20 },
+      { level: 2, name: "창천검법", reqType: "stats", reqInt: 5, reqStr: 5, bonus: 50 },
+      { level: 3, name: "창천제일검", reqType: "power", reqPower: 150, bonus: 90 },
+      { level: 4, name: "제왕검형", reqType: "power", reqPower: 300, bonus: 130 },
+      { level: 5, name: "최종비기: 창천무극검해", reqType: "power", reqPower: 500, bonus: 178 }
+    ],
+    "하북팽가": [
+      { level: 1, name: "팽가기초도법", reqType: "stats", reqInt: 0, reqStr: 0, bonus: 20 },
+      { level: 2, name: "오호단문도", reqType: "stats", reqInt: 5, reqStr: 8, bonus: 50 },
+      { level: 3, name: "오라혼원도", reqType: "power", reqPower: 150, bonus: 90 },
+      { level: 4, name: "패왕도형", reqType: "power", reqPower: 300, bonus: 130 },
+      { level: 5, name: "최종비기: 도왕패도신공", reqType: "power", reqPower: 500, bonus: 178 }
+    ],
+    "제갈세가": [
+      { level: 1, name: "제갈기초심법", reqType: "stats", reqInt: 0, reqStr: 0, bonus: 20 },
+      { level: 2, name: "기문팔괘보", reqType: "stats", reqInt: 8, reqStr: 5, bonus: 50 },
+      { level: 3, name: "천지둔갑검", reqType: "power", reqPower: 150, bonus: 90 },
+      { level: 4, name: "제갈명경심법", reqType: "power", reqPower: 300, bonus: 130 },
+      { level: 5, name: "최종비기: 기문둔갑 무극진인검", reqType: "power", reqPower: 500, bonus: 178 }
+    ]
+  },
+  yearly_training_options: [
+    { id: "beg_begging", name: "저잣거리 동냥", description: "거지 신분으로 동냥하며 근골을 단련합니다. (14세 이하)", max_age: 14, primaryStat: "karma" },
+    { id: "train_strength", name: "외공 수련", description: "바위를 들고 달리며 근력과 체력을 단련합니다.", min_age: 12, primaryStat: "strength" },
+    { id: "train_internal", name: "운기조식", description: "가좌하여 문파 심법을 운용하고 내공을 끌어올립니다.", min_age: 12, primaryStat: "internal_power" },
+    { id: "train_agility", name: "보법 연습", description: "나무 위를 달리고 보법을 연마하여 신법을 올립니다.", min_age: 12, primaryStat: "agility" },
+    { id: "train_education", name: "명심보감 독경", description: "경전을 읽고 학문과 식견을 높입니다.", min_age: 12, primaryStat: "education" },
+    { id: "gangho_travel", name: "강호 행각", description: "세상을 유람하며 명성과 기연을 찾습니다.", min_age: 15, primaryStat: "reputation" }
+  ]
+};
+
+const karmaOpportunities = [
+  { name: "만년삼 섭취", desc: "심산유곡에서 만년삼을 발견하여 복용했습니다!", stat: "int", gain: 8 },
+  { name: "천년한철 주조", desc: "희귀한 천년한철로 무기를 보강했습니다!", stat: "str", gain: 8 },
+  { name: "기인과의 바둑 한 판", desc: "수수께끼 기인과 바둑을 두며 신법보법의 이치를 깨달았습니다!", stat: "agi", gain: 8 },
+  { name: "벽력탄 비급 습득", desc: "고대 병서에서 혜안을 얻어 지적 식견이 트였습니다!", stat: "edu", gain: 8 },
+  { name: "구혈의 혈도 개통", desc: "운 좋게 임독양맥의 기혈이 뚫렸습니다!", stat: "kar", gain: 8 }
+];
+
+const fullFactions = [
+  { name: "소림사", type: "strength", desc: "외공과 금강불괴 중심 수련" },
+  { name: "화산파", type: "agility", desc: "신법과 매화 쾌검 중심 수련" },
+  { name: "무당파", type: "internal_power", desc: "태극과 순양 내공 중심 수련" },
+  { name: "사천당문", type: "agility", desc: "암기와 신법 중심 수련" },
+  { name: "남궁세가", type: "strength", desc: "창천제일검과 제왕 외공 수련" },
+  { name: "제갈세가", type: "internal_power", desc: "기문둔갑과 심법 중심 수련" },
+  { name: "하북팽가", type: "strength", desc: "도법과 패도적인 외공 수련" }
+];
+
+let state = {
+  name: "",
+  gender: "male",
+  appearance: "m_1",
+  age: 12,
+  faction: "거지",
+  title: "무명소협(無名小俠)",
+  realm: "삼류(三流)",
+  rank: "평거지",
+  currentSkillIndex: 0,
+  skillLevel: 1,
+  str: 1, int: 1, agi: 1, edu: 1, rep: 0, kar: 1,
+  tournamentType: 25,
+  isReborn: false
+};
+
+let gameHistoryData = {
+  startAge: 12,
+  tournamentWins: 0,
+  cultKills: 0,
+  awardList: [],
+  treasuresObtained: []
+};
+
+let previousStats = { str: 1, int: 1, agi: 1, edu: 1, rep: 0, kar: 1 };
+let currentYearLog = [];
+let currentTournamentRound = 0;
+let pendingSkillToLearn = null;
+let skillEventCooldownYears = 0;
+let repGiftCooldownYears = 0;
+let currentActiveRandomEvent = null;
+let pendingTriggeredEvent = null;
+
+let allocStats = { str: 1, int: 1, agi: 1, edu: 1, kar: 1 };
+let remainingAllocPoints = 45;
+
+const loadingPhrases = [
+  "운기조식 진행 중...",
+  "심법 연마 중...",
+  "기혈 순환 중...",
+  "강호 유랑 중...",
+  "내력 증진 중...",
+  "무학 깨달음 탐색 중...",
+  "학문 수련 중...",
+  "보법 연습 중..."
+];
+
+let loadingTimer = null;
+let textSwitchTimer = null;
+let currentProgress = 0;
+let isPausedForEvent = false;
+let selectedOptionForLoading = null;
+
+const appearances = {
+  male: [
+    { id: "m_1", label: "샤프한 울프컷 무사" },
+    { id: "m_2", label: "차분하게 내린 생장발 고수" },
+    { id: "m_3", label: "여유로운 실눈캐 기인" },
+    { id: "m_4", label: "갓을 쓴 유랑 무객" },
+    { id: "m_5", label: "야성적 삐죽 장발" },
+    { id: "m_6", label: "단아한 상투 묶음 수제자" }
+  ],
+  female: [
+    { id: "f_1", label: "귀여운 만두머리 소녀" },
+    { id: "f_2", label: "차분한 긴 생머리 검객" },
+    { id: "f_3", label: "실눈캐 여고수" },
+    { id: "f_4", label: "땋은머리 소녀 무사" },
+    { id: "f_5", label: "분홍 리본 흩날리는 여협" },
+    { id: "f_6", label: "날렵한 숏컷 여검객" }
+  ]
+};
+
+window.onload = () => { renderAppearanceOptions(); };
+
+function clampStat(val) { return Math.min(99, Math.max(0, val)); }
+
+function renderAppearanceOptions() {
+  const gender = document.getElementById('input-gender').value;
+  const list = document.getElementById('appearance-list');
+  list.innerHTML = '';
+
+  appearances[gender].forEach((app, idx) => {
+    const card = document.createElement('div');
+    card.className = `app-card ${idx === 0 ? 'selected' : ''}`;
+    card.innerText = app.label;
+    card.onclick = () => {
+      document.querySelectorAll('.app-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      state.appearance = app.id;
+      drawHighResPixelArt('previewCanvas');
+    };
+    list.appendChild(card);
+  });
+
+  state.appearance = appearances[gender][0].id;
+  drawHighResPixelArt('previewCanvas');
+}
+
+function goToStep1() {
+  document.getElementById('create-step-2').classList.add('hidden');
+  document.getElementById('create-step-1').classList.remove('hidden');
+}
+
+function goToStep2() {
+  const nameInput = document.getElementById('input-name').value.trim();
+  if (!nameInput) { alert('이름을 입력해 주세요!'); return; }
+  state.name = nameInput;
+  state.gender = document.getElementById('input-gender').value;
+
+  document.getElementById('create-step-1').classList.add('hidden');
+  document.getElementById('create-step-2').classList.remove('hidden');
+  renderAppearanceOptions();
+}
+
+function goToStep3() {
+  document.getElementById('create-step-2').classList.add('hidden');
+  document.getElementById('create-step-3').classList.remove('hidden');
+  updateAllocUI();
+}
+
+function changeAllocStat(statKey, delta) {
+  if (delta > 0) {
+    if (remainingAllocPoints <= 0 || allocStats[statKey] >= 15) return;
+    allocStats[statKey]++;
+    remainingAllocPoints--;
+  } else {
+    if (allocStats[statKey] <= 1) return;
+    allocStats[statKey]--;
+    remainingAllocPoints++;
+  }
+  updateAllocUI();
+}
+
+function updateAllocUI() {
+  document.getElementById('alloc-remaining-points').innerText = remainingAllocPoints;
+  document.getElementById('alloc-val-str').innerText = allocStats.str;
+  document.getElementById('alloc-val-int').innerText = allocStats.int;
+  document.getElementById('alloc-val-agi').innerText = allocStats.agi;
+  document.getElementById('alloc-val-edu').innerText = allocStats.edu;
+  document.getElementById('alloc-val-kar').innerText = allocStats.kar;
+}
+
+function finishCharacterCreation() {
+  if (remainingAllocPoints > 0) {
+    alert(`아직 사용하지 않은 포인트가 ${remainingAllocPoints}점 남아있습니다! 모두 분배해주세요.`);
+    return;
+  }
+
+  state.str = allocStats.str;
+  state.int = allocStats.int;
+  state.agi = allocStats.agi;
+  state.edu = allocStats.edu;
+  state.kar = allocStats.kar;
+
+  document.getElementById('create-modal').classList.add('hidden');
+  updateUI();
+  drawHighResPixelArt('pixelCanvas');
+  showTrainingChoices();
+}
+
+// 스탯 99 x 6개 + 최고무공 Lv.10 기준 정확히 1000 전투력 산출
+function calculateTotalPower() {
+  let power = (state.str * 1.8) + (state.int * 1.8) + (state.agi * 1.8) + (state.kar * 1.2) + (state.edu * 1.2);
+  
+  if (state.faction === '화산파') power += state.agi * 0.15;
+  else if (state.faction === '소림사') power += state.str * 0.15;
+  else if (state.faction === '무당파') power += state.int * 0.15;
+
+  const skills = gameData.faction_skills[state.faction] || gameData.faction_skills["거지"];
+  const currentSkill = skills[state.currentSkillIndex] || skills[0];
+  power += currentSkill.bonus + (state.skillLevel * 5);
+
+  return Math.min(1000, Math.round(power));
+}
+
+// 720x720 고화질 도트 스케일링 렌더링 엔진
+function drawHighResPixelArt(canvasId) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
+
+  const GRID = 48; // 48x48 픽셀 그리드를 720x720으로 15배 확대
+  const P = 720 / GRID;
+
+  ctx.fillStyle = "#181412";
+  ctx.fillRect(0, 0, 720, 720);
+
+  const outfit = factionOutfitColors[state.faction] || factionOutfitColors["거지"];
+  const isFemale = state.gender === "female";
+
+  function drawPixel(x, y, color) {
+    ctx.fillStyle = color;
+    ctx.fillRect(x * P, y * P, P, P);
+  }
+
+  function drawRect(x, y, w, h, color) {
+    ctx.fillStyle = color;
+    ctx.fillRect(x * P, y * P, w * P, h * P);
+  }
+
+  // 1. 목 및 의복 (어깨)
+  drawRect(18, 30, 12, 10, "#f3d5c8");
+  drawRect(8, 38, 32, 10, outfit.primary);
+  drawRect(20, 38, 8, 10, outfit.secondary);
+
+  // 2. 얼굴 윤곽 (피부)
+  drawRect(14, 12, 20, 20, "#ffe5d9");
+  drawRect(16, 32, 16, 3, "#ffe5d9");
+
+  // 3. 눈 표현
+  if (state.appearance.includes("m_3") || state.appearance.includes("f_3")) {
+    drawRect(17, 20, 5, 2, "#18181b");
+    drawRect(26, 20, 5, 2, "#18181b");
+  } else {
+    drawRect(17, 19, 4, 4, "#18181b");
+    drawRect(27, 19, 4, 4, "#18181b");
+    drawPixel(18, 20, "#ffffff");
+    drawPixel(28, 20, "#ffffff");
+  }
+
+  // 4. 입 표현
+  drawRect(21, 28, 6, 2, isFemale ? "#e11d48" : "#881337");
+
+  // 5. 헤어스타일 및 특수 외형
+  const hairColor = "#18181b";
+  if (state.appearance.includes("f_1")) { // 만두머리
+    drawRect(10, 6, 6, 6, hairColor);
+    drawRect(32, 6, 6, 6, hairColor);
+    drawRect(12, 8, 24, 10, hairColor);
+  } else if (state.appearance.includes("m_4")) { // 갓
+    drawRect(4, 10, 40, 3, "#451a03");
+    drawRect(14, 3, 20, 7, "#261002");
+  } else if (state.appearance.includes("f_5")) { // 분홍 리본
+    drawRect(12, 8, 24, 10, hairColor);
+    drawRect(11, 6, 6, 3, "#f472b6");
+    drawRect(31, 6, 6, 3, "#f472b6");
+  } else {
+    drawRect(12, 8, 24, 10, hairColor);
+    drawRect(10, 12, 4, 14, hairColor);
+    drawRect(34, 12, 4, 14, hairColor);
+  }
+}
+
+function updateUI() {
+  state.str = clampStat(state.str);
+  state.int = clampStat(state.int);
+  state.agi = clampStat(state.agi);
+  state.edu = clampStat(state.edu);
+  state.rep = clampStat(state.rep);
+  state.kar = clampStat(state.kar);
+
+  const totalPower = calculateTotalPower();
+
+  document.getElementById('ui-name').innerText = state.name || "소협";
+  document.getElementById('ui-age').innerText = state.age;
+  document.getElementById('ui-faction').innerText = state.faction;
+  document.getElementById('ui-realm').innerText = state.realm;
+
+  document.getElementById('ui-total-power').innerText = totalPower;
+  document.getElementById('ui-detail-power').innerText = `${totalPower} / 1000`;
+
+  document.getElementById('ui-str').innerText = state.str;
+  document.getElementById('ui-int').innerText = state.int;
+  document.getElementById('ui-agi').innerText = state.agi;
+  document.getElementById('ui-edu').innerText = state.edu;
+  document.getElementById('ui-rep').innerText = state.rep;
+  document.getElementById('ui-kar').innerText = state.kar;
+
+  document.getElementById('ui-detail-str').innerText = `${state.str} / 99`;
+  document.getElementById('ui-detail-int').innerText = `${state.int} / 99`;
+  document.getElementById('ui-detail-agi').innerText = `${state.agi} / 99`;
+  document.getElementById('ui-detail-edu').innerText = `${state.edu} / 99`;
+  document.getElementById('ui-detail-rep').innerText = `${state.rep} / 99`;
+  document.getElementById('ui-detail-kar').innerText = `${state.kar} / 99`;
+
+  let rankList = gameData.game_config.faction_ranks["일반"];
+  if (state.faction === "거지") rankList = gameData.game_config.faction_ranks["거지"];
+  else if (state.faction.includes("세가")) rankList = gameData.game_config.faction_ranks["세가"];
+  else if (state.faction === "무림맹") rankList = gameData.game_config.faction_ranks["무림맹"];
+
+  for (let r of rankList) { if (state.rep >= r.min_rep) state.rank = r.name; }
+  for (let stage of gameData.game_config.realm_stages) { if (state.int >= stage.min_internal_power) state.realm = stage.name; }
+  for (let t of gameData.game_config.titles) { if (state.rep >= t.req_rep) state.title = t.name; }
+
+  document.getElementById('ui-title').innerText = state.title;
+  document.getElementById('ui-rank').innerText = state.rank;
+
+  const skills = gameData.faction_skills[state.faction] || gameData.faction_skills["거지"];
+  const currentSkill = skills[state.currentSkillIndex] || skills[0];
+  document.getElementById('ui-skill-name').innerText = currentSkill.name;
+  document.getElementById('ui-skill-level').innerText = `Lv.${state.skillLevel} / 10`;
+}
+
+function addLog(msg, isHighlight = false) {
+  const recent = document.getElementById('recent-log');
+  const full = document.getElementById('full-log');
+  const item = `<div class="log-item" style="${isHighlight ? 'color:var(--accent-color); font-weight:bold;' : ''}">[${state.age}세] ${msg}</div>`;
+  recent.innerHTML = item;
+  full.innerHTML += item;
+  full.scrollTop = full.scrollHeight;
+  currentYearLog.push(msg);
+}
+
+function showTrainingChoices() {
+  updateUI();
+  const btnGroup = document.getElementById('action-buttons');
+  btnGroup.innerHTML = '';
+
+  gameData.yearly_training_options.forEach(opt => {
+    if (opt.max_age && state.age > opt.max_age) return;
+    if (opt.min_age && state.age < opt.min_age) return;
+
+    const btn = document.createElement('button');
+    btn.className = 'action-btn';
+    btn.innerHTML = `<span><b>${opt.name}</b><br><small style="color:var(--text-sub)">${opt.description}</small></span> 👉`;
+    btn.onclick = () => startYearProcessWithLoading(opt);
+    btnGroup.appendChild(btn);
+  });
+}
+
+function startYearProcessWithLoading(option) {
+  selectedOptionForLoading = option;
+  currentProgress = 0;
+  isPausedForEvent = false;
+  pendingTriggeredEvent = null;
+
+  document.getElementById('loading-bar').style.width = '0%';
+  document.getElementById('loading-modal').classList.remove('hidden');
+
+  // 하위 무공 단계별 확률 차등 적용 (초반에는 무공을 자주 잘 배우게 설정)
+  const currentSkillTier = state.currentSkillIndex;
+  let skillTriggerChance = 0.15;
+  if (currentSkillTier === 0) skillTriggerChance = 0.45; // 1단계 -> 2단계 아주 잘 배움
+  else if (currentSkillTier === 1) skillTriggerChance = 0.35; // 2단계 -> 3단계 잘 배움
+  else if (currentSkillTier === 2) skillTriggerChance = 0.20; // 3단계 -> 4단계
+  else skillTriggerChance = 0.10; // 최종 비기
+
+  // 일반 돌발 이벤트는 10년에 1번꼴로 희귀하게 발생 (약 5~8%)
+  const randVal = Math.random();
+  if (state.age >= 22 && randVal < 0.04) {
+    pendingTriggeredEvent = "cult";
+  } else if (state.rep >= 20 && repGiftCooldownYears <= 0 && randVal < 0.07) {
+    pendingTriggeredEvent = "gift";
+  } else if (skillEventCooldownYears <= 0 && randVal < skillTriggerChance && !pendingSkillToLearn) {
+    const skills = gameData.faction_skills[state.faction] || gameData.faction_skills["거지"];
+    if (state.currentSkillIndex + 1 < skills.length) pendingTriggeredEvent = "skill";
+  } else if (randVal < 0.12) {
+    pendingTriggeredEvent = "random";
+  }
+
+  startLoadingBarTimer();
+}
+
+function startLoadingBarTimer() {
+  const shuffled = [...loadingPhrases].sort(() => 0.5 - Math.random()).slice(0, 3);
+  let phraseIdx = 0;
+
+  clearInterval(textSwitchTimer);
+  textSwitchTimer = setInterval(() => {
+    if (isPausedForEvent) return;
+    phraseIdx = (phraseIdx + 1) % shuffled.length;
+    document.getElementById('loading-status-text').innerText = shuffled[phraseIdx];
+  }, 1200);
+
+  clearInterval(loadingTimer);
+  loadingTimer = setInterval(() => {
+    if (isPausedForEvent) return;
+
+    currentProgress += 2.5;
+    document.getElementById('loading-bar').style.width = `${currentProgress}%`;
+
+    if (currentProgress >= 50 && pendingTriggeredEvent && !isPausedForEvent) {
+      isPausedForEvent = true;
+      executePendingEvent();
+      return;
+    }
+
+    if (currentProgress >= 100) {
+      finishLoadingAndApplyYear();
+    }
+  }, 90);
+}
+
+function executePendingEvent() {
+  const type = pendingTriggeredEvent;
+  pendingTriggeredEvent = null;
+
+  if (type === "cult") triggerCultEncounterEvent();
+  else if (type === "gift") { repGiftCooldownYears = 5; triggerReputationGiftEvent(); }
+  else if (type === "skill") {
+    const skills = gameData.faction_skills[state.faction] || gameData.faction_skills["거지"];
+    
+    // 하위 무공일수록 다음 무공을 배우는 텀을 짧게 설정
+    if (state.currentSkillIndex === 0) skillEventCooldownYears = 1;
+    else if (state.currentSkillIndex === 1) skillEventCooldownYears = 2;
+    else skillEventCooldownYears = 4;
+
+    pendingSkillToLearn = skills[state.currentSkillIndex + 1];
+    triggerSkillEventModal(pendingSkillToLearn);
+  } else if (type === "random") triggerRandomEvent();
+}
+
+function triggerCultEncounterEvent() {
+  document.getElementById('rand-event-title').innerText = "👹 사파·마교 고수 조우!";
+  document.getElementById('rand-event-desc').innerText = `강호 유랑 중 섬뜩한 기운의 마교 지부 고수와 조우했습니다! (내 보법: ${state.agi})`;
+  
+  const btns = document.getElementById('rand-event-btns');
+  btns.innerHTML = `
+    <button class="action-btn" style="flex:1; justify-content:center; background:#065f46; font-weight:bold;" onclick="resolveCultEncounter(true)">싸운다 ⚔️</button>
+    <button class="action-btn" style="flex:1; justify-content:center; background:#450a0a; font-weight:bold;" onclick="resolveCultEncounter(false)">도망친다 🏃</button>
+  `;
+  document.getElementById('random-event-modal').classList.remove('hidden');
+}
+
+function resolveCultEncounter(isFight) {
+  document.getElementById('random-event-modal').classList.add('hidden');
+  
+  if (!isFight) {
+    const reqAgi = 30 + Math.floor(state.age * 0.4);
+    if (state.agi >= reqAgi) {
+      addLog("⚡ 신속한 보법을 발휘하여 마교 고수의 추격을 따돌리고 탈출했습니다!");
+      showEventResultModal("🏃 도주 성공!", `뛰어난 보법(${state.agi})으로 피해 없이 깔끔하게 도망쳤습니다!`);
+    } else {
+      const lossStr = Math.floor(Math.random() * 4) + 1;
+      const lossInt = Math.floor(Math.random() * 4) + 1;
+      state.str = clampStat(state.str - lossStr);
+      state.int = clampStat(state.int - lossInt);
+      state.rep = clampStat(state.rep - 4);
+
+      addLog(`⚠️ 보법이 부족해 등 뒤 습격을 받았습니다! (근력 -${lossStr}, 내력 -${lossInt}, 명성 -4)`);
+      showEventResultModal("🩸 등 뒤 습격!", `보법이 낮아 도망치는 도중 공격을 허용했습니다!\n\n▶ 근력 -${lossStr}, 내력 -${lossInt}, 명성 -4 손실`);
+    }
+  } else {
+    const myPower = calculateTotalPower();
+    const reqPower = 200 + (state.age * 2.5);
+
+    if (myPower >= reqPower || Math.random() < 0.15) {
+      state.str = clampStat(state.str + 4); state.int = clampStat(state.int + 4);
+      state.agi = clampStat(state.agi + 4); state.edu = clampStat(state.edu + 4);
+      state.kar = clampStat(state.kar + 4); state.rep = clampStat(state.rep + 10);
+      gameHistoryData.cultKills += 1;
+      gameHistoryData.treasuresObtained.push(`마교 고수 전유물 (${state.age}세)`);
+
+      addLog("✨ 사파·마교 고수를 격퇴했습니다! 모든 스탯 +4, 명성 +10!", true);
+      showEventResultModal("⚔️ 비무 승리!", "치열한 혈투 끝에 마교 고수를 격퇴했습니다!\n\n▶ 모든 능력치 +4 대폭 상승!\n▶ 명성 +10 상승!");
+    } else {
+      if (Math.random() < 0.10) {
+        addLog("💀 [사망] 마교 고수의 흉독한 마공을 견디지 못하고 강호에서 목숨을 잃었습니다...", true);
+        alert("👹 마교 고수와의 비무에서 패배하여 목숨을 잃었습니다... [GAME OVER]");
+        confirmRetire(true);
+        return;
+      }
+
+      state.str = clampStat(state.str - 4); state.int = clampStat(state.int - 4); state.rep = clampStat(state.rep - 6);
+      addLog("⚠️ 마교 고수의 마공에 패배하여 내상을 입었습니다. (근력 -4, 내력 -4, 명성 -6)");
+      showEventResultModal("💀 비무 패배", "심각한 내상을 입고 겨우 목숨만 건졌습니다.\n\n▶ 근력 -4, 내력 -4, 명성 -6 감소");
+    }
+  }
+}
+
+function triggerReputationGiftEvent() {
+  document.getElementById('rand-event-title').innerText = "🎁 명성을 들은 무림인의 선물";
+  document.getElementById('rand-event-desc').innerText = `소협의 강호 명성(${state.rep})을 전해 들은 후원자가 보물을 보내왔습니다!`;
+
+  const btns = document.getElementById('rand-event-btns');
+  btns.innerHTML = `<button class="action-btn" style="flex:1; justify-content:center; background:#065f46; font-weight:bold;" onclick="acceptReputationGift()">기꺼이 받는다 🎁</button>`;
+  document.getElementById('random-event-modal').classList.remove('hidden');
+}
+
+function acceptReputationGift() {
+  document.getElementById('random-event-modal').classList.add('hidden');
+  const giftGains = [
+    { name: "소환단", stat: "int", gain: 6, msg: "내력이 6 증가했습니다." },
+    { name: "백련강검", stat: "str", gain: 6, msg: "근력이 6 증가했습니다." },
+    { name: "비단 보법서", stat: "agi", gain: 6, msg: "보법이 6 증가했습니다." }
+  ];
+  const g = giftGains[Math.floor(Math.random() * giftGains.length)];
+
+  if (g.stat === 'int') state.int = clampStat(state.int + g.gain);
+  if (g.stat === 'str') state.str = clampStat(state.str + g.gain);
+  if (g.stat === 'agi') state.agi = clampStat(state.agi + g.gain);
+
+  gameHistoryData.treasuresObtained.push(`${g.name} (${state.age}세 명성 선물)`);
+  addLog(`🎁 명성 선물로 [${g.name}]을 전해받았습니다! (${g.msg})`, true);
+  showEventResultModal("🎁 선물 수령", `강호 명성에 감복한 후원자로부터 [${g.name}]을 전수받았습니다!\n\n▶ ${g.msg}`);
+}
+
+function triggerRandomEvent() {
+  const rivalFactions = ["화산파 대제자", "무당파 신예고수", "남궁세가 소가주", "사천당문 소가주", "하북팽가 소가주", "종남파 대제자"];
+  const selectedRival = rivalFactions[Math.floor(Math.random() * rivalFactions.length)];
+  const rivalPower = Math.round(calculateTotalPower() * (0.85 + Math.random() * 0.3));
+
+  const events = [
+    { type: "formation", title: "📜 강호 고대 진법 대파회 개최", desc: "고대 기문진법의 비밀을 파헤치는 진법 대회가 열렸습니다! (높은 학문 스탯 요구)" },
+    { type: "rival", title: "⚔️ 숙적 라이벌의 도전장", desc: `<b>[상대: ${selectedRival}]</b>이(가) 당신의 명성을 시기하며 비무를 신청했습니다!\n\n▶ 상대 전투력: <b>${rivalPower}</b> vs 내 전투력: <b>${calculateTotalPower()}</b>`, rivalPower: rivalPower, rivalName: selectedRival },
+    { type: "small_tournament", title: "🏆 저잣거리 소규모 무술대회", desc: "지역 무관들이 주최하는 소규모 무술대회가 열렸습니다! (전투력 평가)" }
+  ];
+
+  currentActiveRandomEvent = events[Math.floor(Math.random() * events.length)];
+  document.getElementById('rand-event-title').innerText = currentActiveRandomEvent.title;
+  document.getElementById('rand-event-desc').innerHTML = currentActiveRandomEvent.desc;
+
+  const btns = document.getElementById('rand-event-btns');
+  btns.innerHTML = `
+    <button class="action-btn" style="flex:1; justify-content:center; background:#065f46; font-weight:bold;" onclick="resolveRandomEvent(true)">도전하기 ⚔️</button>
+    <button class="action-btn" style="flex:1; justify-content:center; background:#450a0a; font-weight:bold;" onclick="resolveRandomEvent(false)">사양하기 🏃</button>
+  `;
+  document.getElementById('random-event-modal').classList.remove('hidden');
+}
+
+function resolveRandomEvent(isAccepted) {
+  document.getElementById('random-event-modal').classList.add('hidden');
+  
+  if (!isAccepted) {
+    addLog("돌발 이벤트를 사양하고 수련에 전념했습니다.");
+    showEventResultModal("🏃 사양함", "이벤트를 뒤로하고 조용히 수련에 집중했습니다.");
+  } else {
+    const ev = currentActiveRandomEvent;
+    if (ev.type === "formation") {
+      const successProb = state.edu >= 40 ? 0.75 : (state.edu / 60);
+      if (Math.random() < successProb) {
+        state.edu = clampStat(state.edu + 6); state.int = clampStat(state.int + 6);
+        addLog("✨ 진법 대회 우승! 해박한 학문과 지혜로 미궁 진법을 파해했습니다! (학문 +6, 내력 +6)", true);
+        showEventResultModal("📜 진법 해파 우승", `높은 학식(학문: ${state.edu})과 혜안으로 고대 진법을 완벽히 해파했습니다!\n\n▶ 학문 +6, 내력 +6 상승!`);
+      } else {
+        state.edu = clampStat(state.edu + 2);
+        addLog("진법의 아리송한 괘를 풀지 못해 입상에 실패했습니다. (학문 +2)");
+        showEventResultModal("📜 해파 실패", `학식(학문: ${state.edu})이 모자라 진법을 풀지 못했습니다.\n\n▶ 학문 +2 상승`);
+      }
+    } else if (ev.type === "rival") {
+      if (calculateTotalPower() >= ev.rivalPower) {
+        state.agi = clampStat(state.agi + 4); state.int = clampStat(state.int + 4);
+        addLog(`⚔️ [${ev.rivalName}]과의 라이벌전에서 멋지게 승리했습니다! (보법 +4, 내력 +4)`, true);
+        showEventResultModal("⚔️ 라이벌전 승리", `[${ev.rivalName}] (전투력: ${ev.rivalPower})을(를) 격파했습니다!\n\n▶ 보법 +4, 내력 +4 상승!`);
+      } else {
+        state.str = clampStat(state.str + 3);
+        addLog(`[${ev.rivalName}]과의 라이벌전에서 아쉽게 석패했습니다. (근력 +3)`);
+        showEventResultModal("⚔️ 석패", `[${ev.rivalName}]의 압도적인 공세에 석패했습니다.\n\n▶ 근력 +3 상승`);
+      }
+    } else if (ev.type === "small_tournament") {
+      if (calculateTotalPower() >= 150) {
+        state.rep = clampStat(state.rep + 8); state.str = clampStat(state.str + 4);
+        gameHistoryData.tournamentWins += 1;
+        gameHistoryData.awardList.push(`소규모 무술대회 우승 (${state.age}세)`);
+        addLog("🏆 소규모 무술대회 우승! (명성 +8, 근력 +4)", true);
+        showEventResultModal("🏆 무술대회 우승", "저잣거리 무술대회 결승전에서 승리했습니다!\n\n▶ 명성 +8, 근력 +4 상승!");
+      } else {
+        state.rep = clampStat(state.rep + 3);
+        addLog("무술대회 본선 진출에 만족해야 했습니다. (명성 +3)");
+        showEventResultModal("🏆 본선 진출", "아쉽게 4강에서 탈락하여 본선 진출에 만족했습니다.\n\n▶ 명성 +3 상승");
+      }
+    }
+  }
+
+  currentActiveRandomEvent = null;
+}
+
+function showEventResultModal(title, desc) {
+  document.getElementById('event-result-title').innerText = title;
+  document.getElementById('event-result-desc').innerText = desc;
+  document.getElementById('event-result-modal').classList.remove('hidden');
+}
+
+function closeEventResultModal() {
+  document.getElementById('event-result-modal').classList.add('hidden');
+  document.getElementById('loading-modal').classList.remove('hidden');
+  isPausedForEvent = false;
+  startLoadingBarTimer();
+}
+
+function skipLoading() {
+  currentProgress = 100;
+  clearInterval(loadingTimer);
+  clearInterval(textSwitchTimer);
+
+  if (pendingTriggeredEvent && !isPausedForEvent) {
+    isPausedForEvent = true;
+    executePendingEvent();
+  } else {
+    finishLoadingAndApplyYear();
+  }
+}
+
+function finishLoadingAndApplyYear() {
+  clearInterval(loadingTimer);
+  clearInterval(textSwitchTimer);
+  document.getElementById('loading-modal').classList.add('hidden');
+
+  if (selectedOptionForLoading) {
+    processYear(selectedOptionForLoading);
+    selectedOptionForLoading = null;
+  }
+}
+
+function processYear(option) {
+  previousStats = { str: state.str, int: state.int, agi: state.agi, edu: state.edu, rep: state.rep, kar: state.kar };
+  currentYearLog = [];
+
+  const startAge = state.age;
+  state.age += 2;
+  if (skillEventCooldownYears > 0) skillEventCooldownYears -= 1;
+  if (repGiftCooldownYears > 0) repGiftCooldownYears -= 1;
+
+  // 60세 이후 노화 적용: 선택 스탯만 +2 성장, 다른 스탯 1개 랜덤 -1 감소
+  if (state.age >= 60) {
+    const primary = option.primaryStat;
+    if (primary === "strength") state.str = clampStat(state.str + 2);
+    if (primary === "internal_power") state.int = clampStat(state.int + 2);
+    if (primary === "agility") state.agi = clampStat(state.agi + 2);
+    if (primary === "education") state.edu = clampStat(state.edu + 2);
+    if (primary === "reputation") state.rep = clampStat(state.rep + 2);
+    if (primary === "karma") state.kar = clampStat(state.kar + 2);
+
+    const otherStats = ["str", "int", "agi", "edu", "kar"].filter(s => {
+      if (primary === "strength") return s !== "str";
+      if (primary === "internal_power") return s !== "int";
+      if (primary === "agility") return s !== "agi";
+      if (primary === "education") return s !== "edu";
+      return s !== "kar";
+    });
+
+    const decStat = otherStats[Math.floor(Math.random() * otherStats.length)];
+    state[decStat] = clampStat(state[decStat] - 1);
+
+    addLog(`👴 60세 노화로 인해 선택한 [${option.name}] 스탯만 +2 상승하고, 기력이 쇠해 타 능력치(${decStat})가 -1 감소했습니다.`);
+  } else {
+    const primary = option.primaryStat;
+    const statsList = ["strength", "internal_power", "agility", "education", "reputation", "karma"];
+    
+    statsList.forEach(s => {
+      let gain = 0;
+      if (s === primary) {
+        gain = 8;
+      } else {
+        const p = Math.random();
+        if (p < 0.50) gain = 0;
+        else if (p < 0.80) gain = 2;
+        else gain = 4;
+      }
+
+      if (s === "strength") state.str = clampStat(state.str + gain);
+      if (s === "internal_power") state.int = clampStat(state.int + gain);
+      if (s === "agility") state.agi = clampStat(state.agi + gain);
+      if (s === "education") state.edu = clampStat(state.edu + gain);
+      if (s === "reputation") state.rep = clampStat(state.rep + gain);
+      if (s === "karma") state.kar = clampStat(state.kar + gain);
+    });
+
+    addLog(`${option.name} 2년 수련 완수! 무학 및 능력이 성장했습니다.`);
+  }
+
+  if (state.skillLevel < 10) state.skillLevel += 2;
+
+  if ((option.id === 'beg_begging' || option.id === 'gangho_travel') && Math.random() < 0.125) {
+    const opp = karmaOpportunities[Math.floor(Math.random() * karmaOpportunities.length)];
+    if (opp.stat === 'int') state.int = clampStat(state.int + opp.gain);
+    if (opp.stat === 'str') state.str = clampStat(state.str + opp.gain);
+    if (opp.stat === 'agi') state.agi = clampStat(state.agi + opp.gain);
+    if (opp.stat === 'edu') state.edu = clampStat(state.edu + opp.gain);
+    if (opp.stat === 'kar') state.kar = clampStat(state.kar + opp.gain);
+
+    gameHistoryData.treasuresObtained.push(`${opp.name} (${state.age}세 기연)`);
+    addLog(`✨ [12.5% 기연 발동!] ${opp.desc} (${opp.stat} +${opp.gain})`, true);
+  }
+
+  // 18세 -> 20세 전환 시 문파/세가 입문 모달 발생
+  if (startAge === 18 && state.age === 20 && state.faction === '거지') {
+    openRandomFactionSelectModal();
+    return;
+  }
+
+  if (startAge === 24 && state.age === 26) {
+    state.tournamentType = 25;
+    document.getElementById('tour-ask-title').innerText = "🏆 [24세->26세] 천하제일 후기지수 대회";
+    document.getElementById('tour-ask-desc').innerText = "강호 청년 고수들이 자웅을 겨루는 후기지수 대회가 개최되었습니다!";
+    document.getElementById('tournament-ask-modal').classList.remove('hidden');
+    return;
+  }
+
+  if (startAge === 50 && state.age === 52) {
+    state.tournamentType = 50;
+    document.getElementById('tour-ask-title').innerText = "🏆 50세 천하제일 무공대회";
+    document.getElementById('tour-ask-desc').innerText = "천하제일의 고수를 가리는 천하제일 무공대회가 열렸습니다. 참가하시겠습니까?";
+    document.getElementById('tournament-ask-modal').classList.remove('hidden');
+    return;
+  }
+
+  if (startAge === 70 && state.age === 72 && !state.isReborn) {
+    if (state.str >= 80 && state.int >= 80 && state.agi >= 80 && state.edu >= 80 && state.kar >= 80 && state.rep >= 80) {
+      triggerRebirthModal();
+      return;
+    }
+  }
+
+  if (startAge === 78 && state.age === 80) {
+    triggerDemonicInvasionEvent();
+    return;
+  }
+
+  openYearSummary();
+}
+
+function triggerRebirthModal() {
+  state.isReborn = true;
+  const choicesDiv = document.getElementById('rebirth-choices');
+  choicesDiv.innerHTML = '';
+
+  const statList = [
+    { key: "str", name: "💪 근력" },
+    { key: "int", name: "☯️ 내력" },
+    { key: "agi", name: "⚡ 보법" },
+    { key: "edu", name: "🧠 학문" },
+    { key: "kar", name: "✨ 기연" }
+  ];
+
+  let selected = [];
+
+  statList.forEach(s => {
+    const btn = document.createElement('button');
+    btn.className = 'action-btn';
+    btn.innerText = `${s.name} 선택`;
+    btn.onclick = () => {
+      if (selected.includes(s.key)) {
+        selected = selected.filter(k => k !== s.key);
+        btn.style.borderColor = "var(--border-color)";
+      } else {
+        if (selected.length >= 2) return;
+        selected.push(s.key);
+        btn.style.borderColor = "#4ade80";
+      }
+
+      if (selected.length === 2) {
+        if (confirm(`선택한 2개 능력치를 99(최대치)로 환골탈태 시키겠습니까?`)) {
+          selected.forEach(k => state[k] = 99);
+          addLog("✨ [환골탈태] 신체의 한계를 뛰어넘어 2개의 능력치가 최고 경지(99)로 고정되었습니다!", true);
+          document.getElementById('rebirth-modal').classList.add('hidden');
+          openYearSummary();
+        }
+      }
+    };
+    choicesDiv.appendChild(btn);
+  });
+
+  document.getElementById('rebirth-modal').classList.remove('hidden');
+}
+
+function triggerDemonicInvasionEvent() {
+  document.getElementById('rand-event-title').innerText = "🌋 [80세] 마교의 강호 대침공!";
+  document.getElementById('rand-event-desc').innerText = "천마가 이끄는 마교의 총집결군이 중원을 침공했습니다! 승리하지 못하면 강호의 종말이며 당신의 목숨도 끝납니다!";
+
+  const btns = document.getElementById('rand-event-btns');
+  btns.innerHTML = `<button class="action-btn" style="flex:1; justify-content:center; background:#065f46; font-weight:bold;" onclick="resolveDemonicInvasion()">천마와 최후의 결전 ⚔️</button>`;
+  document.getElementById('random-event-modal').classList.remove('hidden');
+}
+
+function resolveDemonicInvasion() {
+  document.getElementById('random-event-modal').classList.add('hidden');
+  const myPower = calculateTotalPower();
+  const reqPower = 800;
+
+  if (myPower >= reqPower) {
+    addLog("🏆 마교의 침공을 막아내고 중원 무림을 완벽히 수호했습니다! 전설의 성군으로 추앙받습니다!", true);
+    showEventResultModal("👑 마교 대퇴치 승리!", "80세의 연세에 천마를 베어내고 무림을 구했습니다!\n\n▶ 전설의 수호자로 무림 역사에 영원히 기록됩니다.");
+  } else {
+    addLog("💀 [사망] 천마의 압도적인 흉공에 패배하여 목숨을 잃고 중원이 마교에 짓밟혔습니다...", true);
+    alert("🌋 천마와의 혈전에서 패배하여 사망했습니다... 강호가 멸망했습니다. [GAME OVER]");
+    confirmRetire(true);
+  }
+}
+
+function triggerSkillEventModal(nextSkill) {
+  document.getElementById('skill-event-desc').innerText = `수련 도중 상위 비기인 [${nextSkill.name}]을(를) 전수받을 기회가 생겼습니다! 전수받으시겠습니까?`;
+  document.getElementById('skill-event-modal').classList.remove('hidden');
+}
+
+function acceptNewSkill() {
+  document.getElementById('skill-event-modal').classList.add('hidden');
+  const nextSkill = pendingSkillToLearn;
+  pendingSkillToLearn = null;
+  let isSuccess = false;
+
+  if (nextSkill.reqType === "stats") {
+    if (state.int >= nextSkill.reqInt && state.str >= nextSkill.reqStr) isSuccess = true;
+  } else if (nextSkill.reqType === "power") {
+    if (calculateTotalPower() >= nextSkill.reqPower) isSuccess = true;
+  }
+
+  if (isSuccess) {
+    state.currentSkillIndex += 1;
+    state.skillLevel = 1;
+    addLog(`✨ 스승의 전수로 상위 비기 [${nextSkill.name}]을(를) 익혔습니다!`, true);
+    showEventResultModal("📜 비기 습득 성공", `상위 무학 [${nextSkill.name}]의 깨달음을 얻었습니다!`);
+  } else {
+    state.str = clampStat(state.str - 3); state.int = clampStat(state.int - 3); state.agi = clampStat(state.agi - 3);
+    addLog(`⚠️ [주화입마] 공력이 모자란 상태에서 무리하게 익히려다 기혈이 막혔습니다! (모든 스탯 -3)`, true);
+    document.getElementById('deviance-modal').classList.remove('hidden');
+  }
+}
+
+function closeDevianceModal() {
+  document.getElementById('deviance-modal').classList.add('hidden');
+  document.getElementById('loading-modal').classList.remove('hidden');
+  isPausedForEvent = false;
+  startLoadingBarTimer();
+}
+
+function declineNewSkill() {
+  document.getElementById('skill-event-modal').classList.add('hidden');
+  pendingSkillToLearn = null;
+  addLog("무리한 습득을 피하고 기존 무공을 연마하기로 결정했습니다.");
+  showEventResultModal("🛡️ 수련 전념", "무리한 익힘 대신 기존 무공을 더욱 단단히 연마했습니다.");
+}
+
+function openRandomFactionSelectModal() {
+  const choices = document.getElementById('faction-choices');
+  choices.innerHTML = '';
+
+  if (state.kar >= 18 && state.str < 18 && state.int < 18 && state.agi < 18) {
+    document.getElementById('faction-select-desc').innerText = "20세 입문 시기: 기연은 무성하나 기본 근골이 비루하여 정식 문파의 제안을 받지 못했습니다. 개방 거지로 남습니다.";
+    const stayBtn = document.createElement('button');
+    stayBtn.className = 'action-btn';
+    stayBtn.innerHTML = `<span><b>개방 거지로 계속 살아가기</b></span> 🍂`;
+    stayBtn.onclick = () => {
+      state.faction = "거지";
+      document.getElementById('faction-select-modal').classList.add('hidden');
+      drawHighResPixelArt('pixelCanvas');
+      openYearSummary();
+    };
+    choices.appendChild(stayBtn);
+    document.getElementById('faction-select-modal').classList.remove('hidden');
+    return;
+  }
+
+  document.getElementById('faction-select-desc').innerText = "20세 성년이 되어 강호 명문 문파들이 소협의 가능성을 보고 정식 입문을 제안합니다!";
+
+  let bestStat = "strength";
+  if (state.int >= state.str && state.int >= state.agi) bestStat = "internal_power";
+  if (state.agi >= state.str && state.agi >= state.int) bestStat = "agility";
+
+  const matched = fullFactions.filter(f => f.type === bestStat);
+  const others = fullFactions.filter(f => f.type !== bestStat);
+
+  const selectedFactions = [
+    ...matched.sort(() => 0.5 - Math.random()).slice(0, 2),
+    ...others.sort(() => 0.5 - Math.random()).slice(0, 1)
+  ];
+
+  selectedFactions.forEach(f => {
+    const btn = document.createElement('button');
+    btn.className = 'action-btn';
+    btn.innerHTML = `<span><b>${f.name} 입문</b><br><small style="color:var(--text-sub)">${f.desc}</small></span> ⚔️`;
+    btn.onclick = () => {
+      state.faction = f.name;
+      state.currentSkillIndex = 0;
+      state.skillLevel = 1;
+      addLog(`20세 성년에 ${f.name}의 초청을 받아 정식 입문했습니다!`, true);
+      document.getElementById('faction-select-modal').classList.add('hidden');
+      drawHighResPixelArt('pixelCanvas');
+
+      // 입문 직후 문파 라이벌과의 비무 이벤트 연속 실행
+      setTimeout(() => {
+        const rivalName = `${f.name} 수제자`;
+        const rivalPower = Math.round(calculateTotalPower() * 1.1);
+        currentActiveRandomEvent = {
+          type: "rival",
+          title: `⚔️ [20세] ${f.name} 입문 기념 서열 비무`,
+          desc: `<b>[상대: ${rivalName}]</b>이(가) 신입 사형제인 당신의 실력을 검증하고자 비무를 청했습니다!\n\n▶ 상대 전투력: <b>${rivalPower}</b> vs 내 전투력: <b>${calculateTotalPower()}</b>`,
+          rivalPower: rivalPower,
+          rivalName: rivalName
+        };
+
+        document.getElementById('rand-event-title').innerText = currentActiveRandomEvent.title;
+        document.getElementById('rand-event-desc').innerHTML = currentActiveRandomEvent.desc;
+        const btns = document.getElementById('rand-event-btns');
+        btns.innerHTML = `<button class="action-btn" style="flex:1; justify-content:center; background:#065f46; font-weight:bold;" onclick="resolveRandomEvent(true)">비무에 응한다 ⚔️</button>`;
+        document.getElementById('random-event-modal').classList.remove('hidden');
+      }, 300);
+    };
+    choices.appendChild(btn);
+  });
+
+  const beggarKeepBtn = document.createElement('button');
+  beggarKeepBtn.className = 'action-btn';
+  beggarKeepBtn.style.borderColor = "#991b1b";
+  beggarKeepBtn.innerHTML = `<span><b>[개방 유지] 거지 신분 유지하기</b></span> 🍂`;
+  beggarKeepBtn.onclick = () => {
+    state.faction = "거지";
+    addLog("20세 성년에 문파 입문을 사양하고 개방에 남아 방도가 되었습니다.", true);
+    document.getElementById('faction-select-modal').classList.add('hidden');
+    drawHighResPixelArt('pixelCanvas');
+    openYearSummary();
+  };
+  choices.appendChild(beggarKeepBtn);
+
+  document.getElementById('faction-select-modal').classList.remove('hidden');
+}
+
+function startTournament() {
+  document.getElementById('tournament-ask-modal').classList.add('hidden');
+  currentTournamentRound = 0;
+  setupTournamentRoundUI();
+  document.getElementById('tournament-modal').classList.remove('hidden');
+}
+
+function skipTournament() {
+  document.getElementById('tournament-ask-modal').classList.add('hidden');
+  addLog(`${state.age}세 대회를 관망했습니다.`);
+  openYearSummary();
+}
+
+const tour25Enemies = [
+  { round: "16강 비무", name: "종남파 대제자", power: 180 },
+  { round: "8강 비무", name: "청성파 수제자", power: 250 },
+  { round: "4강 준결승", name: "사천당문 소가주", power: 340 },
+  { round: "🏆 결승전", name: "소림사 후기지수", power: 420 }
+];
+
+const tour50Enemies = [
+  { round: "16강 비무", name: "점창파 장로", power: 480 },
+  { round: "8강 비무", name: "공동파 부문주", power: 580 },
+  { round: "4강 준결승", name: "남궁세가 가주", power: 680 },
+  { round: "🏆 결승전", name: "무당파 장문인", power: 780 }
+];
+
+function setupTournamentRoundUI() {
+  const enemies = state.tournamentType === 25 ? tour25Enemies : tour50Enemies;
+  const enemy = enemies[currentTournamentRound];
+  const myPower = calculateTotalPower();
+
+  document.getElementById('tour-modal-title').innerText = state.tournamentType === 25 ? "🏆 천하제일 후기지수 대회" : "🏆 50세 천하제일 무공대회";
+  document.getElementById('tournament-round-title').innerText = enemy.round;
+  document.getElementById('tournament-enemy-info').innerText = `상대: ${enemy.name}`;
+  document.getElementById('tour-my-power').innerText = myPower;
+  document.getElementById('tour-enemy-power').innerText = enemy.power;
+  document.getElementById('tournament-result-log').innerText = `${enemy.round} 대전 상대가 정해졌습니다. 비무를 시작하십시오!`;
+  
+  const btn = document.getElementById('tournament-btn');
+  btn.innerText = "비무 시작 ⚔️";
+  btn.onclick = runMatchLogic;
+}
+
+function runMatchLogic() {
+  const enemies = state.tournamentType === 25 ? tour25Enemies : tour50Enemies;
+  const enemy = enemies[currentTournamentRound];
+  const myPower = calculateTotalPower();
+
+  let isWin = false;
+  const rand = Math.random();
+
+  if (myPower >= enemy.power) isWin = rand >= 0.05;
+  else isWin = rand < 0.05;
+
+  const logBox = document.getElementById('tournament-result-log');
+  const btn = document.getElementById('tournament-btn');
+
+  if (isWin) {
+    logBox.innerHTML = `<b style="color:#4ade80;">[승리!]</b> ${enemy.name}과의 일전에서 정타를 집어넣어 승리했습니다!`;
+    currentTournamentRound++;
+
+    if (currentTournamentRound >= enemies.length) {
+      gameHistoryData.tournamentWins += 1;
+      if (state.tournamentType === 25) {
+        gameHistoryData.awardList.push(`25세 천하제일 후기지수 대회 우승 (${state.age}세)`);
+        addLog("🏆 천하제일 후기지수 대회 우승! (명성 +20, 내력 +10, 근력 +5)", true);
+        state.rep = clampStat(state.rep + 20); state.int = clampStat(state.int + 10); state.str = clampStat(state.str + 5);
+        btn.innerText = "우승 완료 🎉";
+        btn.onclick = () => { document.getElementById('tournament-modal').classList.add('hidden'); openYearSummary(); };
+      } else {
+        gameHistoryData.awardList.push(`50세 천하제일 무공대회 최고 우승 (${state.age}세)`);
+        addLog("🏆 50세 천하제일 무공대회 최고 우승! 천하제일인 등극!", true);
+        state.rep = clampStat(state.rep + 30); state.int = clampStat(state.int + 15);
+        btn.innerText = "천하제일인 선택하기 👑";
+        btn.onclick = () => {
+          document.getElementById('tournament-modal').classList.add('hidden');
+          document.getElementById('alliance-leader-modal').classList.remove('hidden');
+        };
+      }
+    } else {
+      btn.innerText = "다음 라운드 진출 👉";
+      btn.onclick = setupTournamentRoundUI;
+    }
+  } else {
+    logBox.innerHTML = `<b style="color:#f87171;">[패배]</b> ${enemy.name}에게 아쉽게 패배했습니다.`;
+    addLog(`${state.age}세 비무대회 ${enemy.round}에서 귀중한 경험을 쌓았습니다. (명성 +8)`, true);
+    state.rep = clampStat(state.rep + 8);
+    btn.innerText = "돌아가기 🏃";
+    btn.onclick = () => { document.getElementById('tournament-modal').classList.add('hidden'); openYearSummary(); };
+  }
+}
+
+function forfeitTournament() {
+  addLog(`${state.age}세 비무대회에서 신중하게 기권을 선언하고 후일을 도모했습니다.`);
+  document.getElementById('tournament-modal').classList.add('hidden');
+  openYearSummary();
+}
+
+function chooseAllianceLeader(choice) {
+  document.getElementById('alliance-leader-modal').classList.add('hidden');
+  if (choice === 'leader') {
+    state.faction = "무림맹";
+    addLog("👑 무림맹주 직위를 수락하고 강호 무림맹의 총지휘관이 되었습니다!", true);
+    drawHighResPixelArt('pixelCanvas');
+  } else if (choice === 'stay') {
+    addLog("🍃 맹주 자리를 사양하고 기존 소속 문파의 고수로 유유자적 살아가기로 했습니다.", true);
+  } else {
+    addLog("📜 천하제일인의 위치에서 전격 은퇴를 선언하고 강호 일대기를 마감합니다.", true);
+    confirmRetire(true);
+    return;
+  }
+  openYearSummary();
+}
+
+function handleTournamentClick() { runMatchLogic(); }
+
+function openYearSummary() {
+  document.getElementById('summary-title').innerText = `[${state.age}세] 강호 결산`;
+  document.getElementById('summary-event-text').innerHTML = currentYearLog.map(l => `• ${l}`).join('<br>');
+  
+  document.getElementById('summary-step-1').classList.remove('hidden');
+  document.getElementById('summary-step-2').classList.add('hidden');
+  document.getElementById('year-transition-modal').classList.remove('hidden');
+}
+
+function showSummaryStep2() {
+  document.getElementById('summary-step-1').classList.add('hidden');
+  document.getElementById('summary-step-2').classList.remove('hidden');
+
+  const diffDiv = document.getElementById('summary-stats-diff');
+  function formatDiff(curr, prev) {
+    const diff = curr - prev;
+    if (diff > 0) return `<span class="diff-plus">+${diff} ▲</span>`;
+    if (diff < 0) return `<span class="diff-minus">${diff} ▼</span>`;
+    return `<span style="color:var(--text-sub)">-</span>`;
+  }
+
+  const currPower = calculateTotalPower();
+
+  diffDiv.innerHTML = `
+    <div class="stat-item"><span>근력</span> <b>${state.str} (${formatDiff(state.str, previousStats.str)})</b></div>
+    <div class="stat-item"><span>내력</span> <b>${state.int} (${formatDiff(state.int, previousStats.int)})</b></div>
+    <div class="stat-item"><span>보법</span> <b>${state.agi} (${formatDiff(state.agi, previousStats.agi)})</b></div>
+    <div class="stat-item"><span>학문</span> <b>${state.edu} (${formatDiff(state.edu, previousStats.edu)})</b></div>
+    <div class="stat-item"><span>명성</span> <b>${state.rep} (${formatDiff(state.rep, previousStats.rep)})</b></div>
+    <div class="stat-item"><span>기연</span> <b>${state.kar} (${formatDiff(state.kar, previousStats.kar)})</b></div>
+    <div class="summary-power-highlight">⚔️ 총 전투력: ${currPower} / 1000</div>
+  `;
+}
+
+function closeYearSummary() {
+  document.getElementById('year-transition-modal').classList.add('hidden');
+  showTrainingChoices();
+}
+
+function confirmRetire(isGameOver = false) {
+  if (isGameOver || confirm("정말로 강호를 은퇴하시겠습니까? 일대기가 총정리됩니다.")) {
+    document.getElementById('retire-char-name').innerText = `${state.name || "소협"}`;
+    document.getElementById('retire-char-title').innerText = `${state.title} / ${state.realm}`;
+    
+    const totalYears = state.age - gameHistoryData.startAge;
+    document.getElementById('retire-period-text').innerText = `${gameHistoryData.startAge}세 ~ ${state.age}세 (총 ${totalYears}년간 활동)`;
+    document.getElementById('retire-summary-power').innerText = `최고 전투력: ${calculateTotalPower()} | 최종 경지: ${state.realm}`;
+
+    document.getElementById('retire-tour-wins').innerText = `${gameHistoryData.tournamentWins}회`;
+    document.getElementById('retire-cult-kills').innerText = `${gameHistoryData.cultKills}회`;
+    document.getElementById('retire-final-rep').innerText = `${state.rep}`;
+
+    const awardBox = document.getElementById('retire-award-list');
+    awardBox.innerHTML = gameHistoryData.awardList.length > 0 ? gameHistoryData.awardList.map(a => `• ${a}`).join('<br>') : "<span style='color:var(--text-sub);'>입상 내역 없음</span>";
+
+    const treasureBox = document.getElementById('retire-treasures-list');
+    treasureBox.innerHTML = gameHistoryData.treasuresObtained.length > 0 ? "<b>🎁 획득한 보물 & 영약 기록:</b><br>" + gameHistoryData.treasuresObtained.map(t => `• ${t}`).join('<br>') : "<span style='color:var(--text-sub);'>습득 기록 없음</span>";
+
+    drawHighResPixelArt('retireCanvas');
+    showRetirePage(1);
+    document.getElementById('retire-modal').classList.remove('hidden');
+  }
+}
+
+function showRetirePage(pageNum) {
+  document.getElementById('retire-page-1').classList.add('hidden');
+  document.getElementById('retire-page-2').classList.add('hidden');
+  document.getElementById('retire-page-3').classList.add('hidden');
+  document.getElementById(`retire-page-${pageNum}`).classList.remove('hidden');
+}
+
+function switchTab(tabName) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.content-area').forEach(c => c.classList.add('hidden'));
+
+  if (tabName === 'main') {
+    document.querySelectorAll('.tab-btn')[0].classList.add('active');
+    document.getElementById('tab-main').classList.remove('hidden');
+  } else if (tabName === 'stats') {
+    document.querySelectorAll('.tab-btn')[1].classList.add('active');
+    document.getElementById('tab-stats').classList.remove('hidden');
+  } else {
+    document.querySelectorAll('.tab-btn')[2].classList.add('active');
+    document.getElementById('tab-log').classList.remove('hidden');
+  }
+}
+</script>
+</body>
+</html>
